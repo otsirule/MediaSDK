@@ -138,7 +138,7 @@ void PrintHelp(const msdk_char *strErrorMessage)
 
     msdk_printf(MSDK_STRING("Force Flags: \n"));
     msdk_printf(MSDK_STRING("   [-FastIntra:I]  - force encoder to skip HEVC-specific intra modes (use AVC modes only) on I-frames\n"));
-    msdk_printf(MSDK_STRING("   [-FastIntra:P]  - force encoder to skip HEVC-specific intra modes (use AVC modes only) on P-frames\n"));
+    msdk_printf(MSDK_STRING("   [-FastIntra:P]  - force encoder to skip HEVC-specific intra modes (use AVC modes only) on P/GPB-frames\n"));
     msdk_printf(MSDK_STRING("   [-FastIntra:B]  - force encoder to skip HEVC-specific intra modes (use AVC modes only) on B-frames\n"));
     msdk_printf(MSDK_STRING("   [-ForceToIntra] - force CUs to be coded as intra using DSO information\n"));
     msdk_printf(MSDK_STRING("   [-ForceToInter] - force CUs to be coded as inter using DSO information\n"));
@@ -557,15 +557,15 @@ mfxStatus CmdProcessor::ParseParamsForOneSession(mfxU32 argc, msdk_char* argv[])
         }
         else if (0 == msdk_strcmp(argv[i], MSDK_STRING("-FastIntra:I")))
         {
-            params.fastIntraModeOnI = 1;
+            params.frameCtrl.CtrlI.FastIntraMode = 1;
         }
         else if (0 == msdk_strcmp(argv[i], MSDK_STRING("-FastIntra:P")))
         {
-            params.fastIntraModeOnP = 1;
+            params.frameCtrl.CtrlP.FastIntraMode = 1;
         }
         else if (0 == msdk_strcmp(argv[i], MSDK_STRING("-FastIntra:B")))
         {
-            params.fastIntraModeOnB = 1;
+            params.frameCtrl.CtrlB.FastIntraMode = 1;
         }
         else if (0 == msdk_strcmp(argv[i], MSDK_STRING("-gop_opt")))
         {
