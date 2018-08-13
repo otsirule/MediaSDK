@@ -242,13 +242,23 @@ mfxStatus FEI_Encode::SetCtrlParams(const HevcTaskDSO& task)
     {
         case MFX_FRAMETYPE_I:
             ctrl->FastIntraMode = m_perTypeFrameCtrl.CtrlI.FastIntraMode;
+            ctrl->ForceCtuSplit = m_perTypeFrameCtrl.CtrlI.ForceCtuSplit;
             break;
         case MFX_FRAMETYPE_P:
             ctrl->FastIntraMode = m_perTypeFrameCtrl.CtrlP.FastIntraMode;
+            ctrl->ForceCtuSplit = m_perTypeFrameCtrl.CtrlP.ForceCtuSplit;
             break;
         case MFX_FRAMETYPE_B:
-            ctrl->FastIntraMode = task.m_isGPBFrame ? m_perTypeFrameCtrl.CtrlP.FastIntraMode
-                                                    : m_perTypeFrameCtrl.CtrlB.FastIntraMode;
+            if (task.m_isGPBFrame)
+            {
+                ctrl->FastIntraMode = m_perTypeFrameCtrl.CtrlP.FastIntraMode;
+                ctrl->ForceCtuSplit = m_perTypeFrameCtrl.CtrlP.ForceCtuSplit;
+            }
+            else
+            {
+                ctrl->FastIntraMode = m_perTypeFrameCtrl.CtrlB.FastIntraMode;
+                ctrl->ForceCtuSplit = m_perTypeFrameCtrl.CtrlB.ForceCtuSplit;
+            }
             break;
         default:
             throw mfxError(MFX_ERR_UNDEFINED_BEHAVIOR, "Invalid m_encodeCtrl.FrameType");
