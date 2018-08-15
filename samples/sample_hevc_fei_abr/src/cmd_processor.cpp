@@ -126,7 +126,10 @@ void PrintHelp(const msdk_char *strErrorMessage)
     msdk_printf(MSDK_STRING("   [-ForceCtuSplit:I] - force splitting CTU into CU at least once on I-frames only\n"));
     msdk_printf(MSDK_STRING("   [-ForceCtuSplit:P] - force splitting CTU into CU at least once on P/GPB-frames only\n"));
     msdk_printf(MSDK_STRING("   [-ForceCtuSplit:B] - force splitting CTU into CU at least once on B-frames only\n"));
-    msdk_printf(MSDK_STRING("   [-NumFramePartitions num] - number of partitions in frame that encoder processes concurrently (1, 2, 4, 8 or 16)\n"));
+    msdk_printf(MSDK_STRING("   [-NumFramePartitions num] - number of partitions in frame that encoder processes concurrently (1, 2, 4 or 8)\n"));
+    msdk_printf(MSDK_STRING("   [-NFP:I num] - number of partitions in I frame that encoder processes concurrently (1, 2, 4 or 8)\n"));
+    msdk_printf(MSDK_STRING("   [-NFP:P num] - number of partitions in P/GPB frame that encoder processes concurrently (1, 2, 4 or 8)\n"));
+    msdk_printf(MSDK_STRING("   [-NFP:B num] - number of partitions in B frame that encoder processes concurrently (1, 2, 4 or 8)\n"));
 
     msdk_printf(MSDK_STRING("Motion Search: \n"));
     msdk_printf(MSDK_STRING("   [-SearchWindow value] - specifies one of the predefined search path and window size. In range [1,5] (5 is default).\n"));
@@ -197,13 +200,26 @@ mfxStatus CheckOptions(const sInputParams & params)
             PrintHelp("Unsupported NumMvPredictorsL1 value (must be in range [0,4])");
             return MFX_ERR_UNSUPPORTED;
         }
-        if (!(params.encodeCtrl.NumFramePartitions == 1 ||
-                params.encodeCtrl.NumFramePartitions == 2 ||
-                params.encodeCtrl.NumFramePartitions == 4 ||
-                params.encodeCtrl.NumFramePartitions == 8 ||
-                params.encodeCtrl.NumFramePartitions == 16  ))
+        std::array<mfxU16, 4> nfp_values = {1, 2, 4, 8};
+        auto it = std::find_if(nfp_values.begin(), nfp_values.end(), [&params](const mfxU16 nfp_val)
+                                                                     { return params.frameCtrl.CtrlI.NumFramePartitions == nfp_val; });
+        if (it == nfp_values.end())
         {
-            PrintHelp("Unsupported NumFramePartitions value (must be 1, 2, 4, 8 or 16)");
+            PrintHelp("Unsupported NumFramePartitions value for I frames (must be 1, 2, 4 or 8)");
+            return MFX_ERR_UNSUPPORTED;
+        }
+        it = std::find_if(nfp_values.begin(), nfp_values.end(), [&params](const mfxU16 nfp_val)
+                                                                { return params.frameCtrl.CtrlP.NumFramePartitions == nfp_val; });
+        if (it == nfp_values.end())
+        {
+            PrintHelp("Unsupported NumFramePartitions value for P/GPB frames (must be 1, 2, 4 or 8)");
+            return MFX_ERR_UNSUPPORTED;
+        }
+        it = std::find_if(nfp_values.begin(), nfp_values.end(), [&params](const mfxU16 nfp_val)
+                                                                { return params.frameCtrl.CtrlB.NumFramePartitions == nfp_val; });
+        if (it == nfp_values.end())
+        {
+            PrintHelp("Unsupported NumFramePartitions value for B frames (must be 1, 2, 4 or 8)");
             return MFX_ERR_UNSUPPORTED;
         }
         if (0 == params.nGopSize)
@@ -568,7 +584,25 @@ mfxStatus CmdProcessor::ParseParamsForOneSession(mfxU32 argc, msdk_char* argv[])
         else if (0 == msdk_strcmp(argv[i], MSDK_STRING("-NumFramePartitions")))
         {
             CHECK_NEXT_VAL(i + 1 >= argc, argv[i]);
-            PARSE_CHECK(msdk_opt_read(argv[++i], params.encodeCtrl.NumFramePartitions), "NumFramePartitions", isParseInvalid)
+            PARSE_CHECK(msdk_opt_read(argv[++i], params.encodeCtrl.NumFramePartitions), "NumFramePartitions", isParseInvalid);
+            params.frameCtrl.CtrlI.NumFramePartitions =
+                params.frameCtrl.CtrlP.NumFramePartitions =
+                params.frameCtrl.CtrlB.NumFramePartitions = params.encodeCtrl.NumFramePartitions;
+        }
+        else if (0 == msdk_strcmp(argv[i], MSDK_STRING("-NFP:I")))
+        {
+            CHECK_NEXT_VAL(i + 1 >= argc, argv[i]);
+            PARSE_CHECK(msdk_opt_read(argv[++i], params.frameCtrl.CtrlI.NumFramePartitions), "NumFramePartitions", isParseInvalid);
+        }
+        else if (0 == msdk_strcmp(argv[i], MSDK_STRING("-NFP:P")))
+        {
+            CHECK_NEXT_VAL(i + 1 >= argc, argv[i]);
+            PARSE_CHECK(msdk_opt_read(argv[++i], params.frameCtrl.CtrlP.NumFramePartitions), "NumFramePartitions", isParseInvalid);
+        }
+        else if (0 == msdk_strcmp(argv[i], MSDK_STRING("-NFP:B")))
+        {
+            CHECK_NEXT_VAL(i + 1 >= argc, argv[i]);
+            PARSE_CHECK(msdk_opt_read(argv[++i], params.frameCtrl.CtrlB.NumFramePartitions), "NumFramePartitions", isParseInvalid);
         }
         else if (0 == msdk_strcmp(argv[i], MSDK_STRING("-FastIntra:I")))
         {

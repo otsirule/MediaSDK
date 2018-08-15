@@ -241,23 +241,27 @@ mfxStatus FEI_Encode::SetCtrlParams(const HevcTaskDSO& task)
     switch (m_encodeCtrl.FrameType  & (MFX_FRAMETYPE_I | MFX_FRAMETYPE_P | MFX_FRAMETYPE_B))
     {
         case MFX_FRAMETYPE_I:
-            ctrl->FastIntraMode = m_perTypeFrameCtrl.CtrlI.FastIntraMode;
-            ctrl->ForceCtuSplit = m_perTypeFrameCtrl.CtrlI.ForceCtuSplit;
+            ctrl->FastIntraMode      = m_perTypeFrameCtrl.CtrlI.FastIntraMode;
+            ctrl->ForceCtuSplit      = m_perTypeFrameCtrl.CtrlI.ForceCtuSplit;
+            ctrl->NumFramePartitions = m_perTypeFrameCtrl.CtrlI.NumFramePartitions;
             break;
         case MFX_FRAMETYPE_P:
-            ctrl->FastIntraMode = m_perTypeFrameCtrl.CtrlP.FastIntraMode;
-            ctrl->ForceCtuSplit = m_perTypeFrameCtrl.CtrlP.ForceCtuSplit;
+            ctrl->FastIntraMode      = m_perTypeFrameCtrl.CtrlP.FastIntraMode;
+            ctrl->ForceCtuSplit      = m_perTypeFrameCtrl.CtrlP.ForceCtuSplit;
+            ctrl->NumFramePartitions = m_perTypeFrameCtrl.CtrlP.NumFramePartitions;
             break;
         case MFX_FRAMETYPE_B:
             if (task.m_isGPBFrame)
             {
-                ctrl->FastIntraMode = m_perTypeFrameCtrl.CtrlP.FastIntraMode;
-                ctrl->ForceCtuSplit = m_perTypeFrameCtrl.CtrlP.ForceCtuSplit;
+                ctrl->FastIntraMode      = m_perTypeFrameCtrl.CtrlP.FastIntraMode;
+                ctrl->ForceCtuSplit      = m_perTypeFrameCtrl.CtrlP.ForceCtuSplit;
+                ctrl->NumFramePartitions = m_perTypeFrameCtrl.CtrlP.NumFramePartitions;
             }
             else
             {
-                ctrl->FastIntraMode = m_perTypeFrameCtrl.CtrlB.FastIntraMode;
-                ctrl->ForceCtuSplit = m_perTypeFrameCtrl.CtrlB.ForceCtuSplit;
+                ctrl->FastIntraMode      = m_perTypeFrameCtrl.CtrlB.FastIntraMode;
+                ctrl->ForceCtuSplit      = m_perTypeFrameCtrl.CtrlB.ForceCtuSplit;
+                ctrl->NumFramePartitions = m_perTypeFrameCtrl.CtrlB.NumFramePartitions;
             }
             break;
         default:
