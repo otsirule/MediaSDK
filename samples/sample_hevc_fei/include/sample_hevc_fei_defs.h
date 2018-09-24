@@ -55,6 +55,20 @@ struct SourceFrameInfo
     }
 };
 
+struct PerTypeCtrl
+{
+    mfxExtFeiHevcEncFrameCtrl   CtrlI;
+    mfxExtFeiHevcEncFrameCtrl   CtrlP; // also applicable for GPB frames
+    mfxExtFeiHevcEncFrameCtrl   CtrlB;
+
+    PerTypeCtrl()
+    {
+        MSDK_ZERO_MEMORY(CtrlI);
+        MSDK_ZERO_MEMORY(CtrlP);
+        MSDK_ZERO_MEMORY(CtrlB);
+    }
+};
+
 struct sInputParams
 {
     SourceFrameInfo input;
@@ -101,6 +115,7 @@ struct sInputParams
 
     mfxExtFeiPreEncCtrl         preencCtrl;
     mfxExtFeiHevcEncFrameCtrl   encodeCtrl;
+    PerTypeCtrl                 frameCtrl;
 
     sInputParams()
         : bENCODE(false)
@@ -172,6 +187,9 @@ struct sInputParams
         //set default values for NumMvPredictors
         encodeCtrl.NumMvPredictors[0] = 3;
         encodeCtrl.NumMvPredictors[1] = 1;
+
+        frameCtrl.CtrlI = frameCtrl.CtrlP = frameCtrl.CtrlB = encodeCtrl;
+        frameCtrl.CtrlI.MVPredictor = 0;
     }
 
 };
